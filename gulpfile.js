@@ -5,6 +5,9 @@ var jshint = require('gulp-jshint');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 var utilities = require('gulp-util');
+var browserSync = require('browser-sync');
+var htmlSync = browserSync.create("html-server");
+var testSync = browserSync.create("test-server");
 var del = require('del');
 var lib = require('bower-files')({
   "overrides":{
@@ -22,12 +25,12 @@ var buildProduction = utilities.env.production;
 
 gulp.task("minifyScripts", ["jsBrowserify"], function() {
   return gulp.src("./build/js/app.js")
-    .pipe(uglify())
+    .pipe(uglify().on('error', utilities.log))
     .pipe(gulp.dest("./build/js"));
 });
 
 gulp.task('concatInterface', function() {
-  return gulp.src(['./js/browser.js', './js/*-interface.js'])
+  return gulp.src(['js/*.js'])
     .pipe(concat('allConcat.js'))
     .pipe(gulp.dest('./tmp'));
 });
@@ -42,8 +45,8 @@ gulp.task('jsBrowserify', ['concatInterface'], function() {
 gulp.task('jshint', function() {
   return gulp.src(['js/*.js'])
     .pipe(jshint())
-    .pipe(jshint.reporter)
-})
+    .pipe(jshint.reporter('default'));
+});
 
 gulp.task('jsBower', function() {
   return gulp.src(lib.ext('js').files)
@@ -63,28 +66,46 @@ gulp.task("clean", function() {
 });
 
 gulp.task('serve', function() {
-  browserSync.init({
+  htmlSync.init({
+    port: 3000,
+    ui: {
+      port: 3001
+    },
     server:{
       baseDir: "./",
       index: "index.html"
     }
   });
 
-  gulp.watch(['js/*.js'], ['jsBuild']);
+  testSync.init({
+    port: 4000,
+    ui: {
+      port: 4001
+    },
+    server:{
+      baseDir: "./",
+      index: "./spec/spec-runner.html"
+    }
+  });
+
+  gulp.watch(['js/*.js', 'spec/*'], ['jsBuild']);
   gulp.watch(['bower.json'], ['bowerBuild']);
   gulp.watch(['*.html'], ['htmlBuild']);
 });
 
 gulp.task('jsBuild', ['jsBrowserify', 'jshint'], function() {
-  browserSync.reload();
+  htmlSync.reload();
+  testSync.reload();
 });
 
 gulp.task('bowerBuild', ['bower'], function() {
-  browserSync.reload();
+  htmlSync.reload();
+  testSync.reload();
 });
 
 gulp.task('htmlBuild', function() {
-  browserSync.reload();
+  htmlSync.reload();
+  testSync.reload();
 });
 
 gulp.task('bower', ['jsBower', 'cssBower']);
