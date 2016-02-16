@@ -6,7 +6,8 @@ function Alarm(alarmTime) {
 }
 
 Alarm.prototype.checkAlarm = function() {
-  if (moment() === this.alarmTime) {
+  console.log(moment().diff(this.alarmTime, moment()));
+  if (moment().diff(this.alarmTime, moment()) < 1000 && moment().diff(this.alarmTime, moment()) > -1000) {
     return true;
   }
   return false;

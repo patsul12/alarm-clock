@@ -3614,7 +3614,8 @@ function Alarm(alarmTime) {
 }
 
 Alarm.prototype.checkAlarm = function() {
-  if (moment() === this.alarmTime) {
+  console.log(moment().diff(this.alarmTime, moment()));
+  if (moment().diff(this.alarmTime, moment()) < 1000 && moment().diff(this.alarmTime, moment()) > -1000) {
     return true;
   }
   return false;
@@ -3628,7 +3629,7 @@ $(function() {
 
   setInterval(function() {
     for (alarm in alarms) {
-      if (alarm.checkAlarm()) {
+      if (alarms[alarm].checkAlarm()) {
         alert("Alarmmmmm" + alarm);
         alarms.splice(alarms.indexOf(alarm),1);
         $("#" + alarm.alarmTime).remove();
@@ -3638,7 +3639,8 @@ $(function() {
 
   $("#create-alarm").on("submit", function(e) {
     e.preventDefault();
-    var alarm = new Alarm(moment($("alarm-time").val()));
+    console.log($("#alarmTime").val());
+    var alarm = new Alarm(moment($("#alarmTime").val()).toString());
     alarms.push(alarm);
     $(".alarms").append("<p id=" + alarm.alarmTime + ">" + alarm.alarmTime + "</p>");
   })
