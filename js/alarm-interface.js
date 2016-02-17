@@ -12,3 +12,7 @@ Alarm.prototype.checkAlarm = function() {
   }
   return false;
 }
+
+function thisisuseless {
+  return true;
+}
